@@ -35,6 +35,7 @@ class Spotify_Ingestion:
         self.song_name = []
         self.song_dict = {}
         self.song_df = None
+        self.ranking = []
         
     def spotify_data_ingestion(self):
         token_url = f"https://api.spotify.com/v1/playlists/{self.playlist_id}/tracks?market={self.market}&fields={self.fields}&limit={self.limit}&offset={self.offset}"
@@ -47,8 +48,8 @@ class Spotify_Ingestion:
         req = requests.get(token_url, data=token_data, headers = token_headers)
         token_response_data = req.json()
 
-        
-        for songs in token_response_data['items']:
+        songs_set = token_response_data['items']
+        for songs in songs_set:
             self.added_at.append(songs['added_at'])
             
             artists = ""
@@ -63,8 +64,11 @@ class Spotify_Ingestion:
             self.artist.append(artists)
             self.song_id.append(songs['track']['id'])
             self.song_name.append(songs['track']['name'])
+        for i in range(len(songs_set)):
+            self.ranking.append(i+1)
         
         self.song_dict = {
+            "ranking": self.ranking,
             "song_id": self.song_id,
             "added_at": self.added_at,
             "artist": self.artist,
@@ -72,7 +76,7 @@ class Spotify_Ingestion:
         }
         
     def convert_dictionary_to_dataframe(self):
-        self.song_df = pd.DataFrame(self.song_dict, columns = ["song_id", "added_at", "artist", "song_name"])
+        self.song_df = pd.DataFrame(self.song_dict, columns = ["ranking", "song_id", "added_at", "artist", "song_name"])
     
     def quality_check(self):
         if self.song_df.empty == True:
@@ -96,7 +100,7 @@ def main():
     access_token = request_bearer_token(client_id, client_secret)
     market = "US"
     fields = "items(added_at,track.artists(name), track.name, track.id)"
-    limit = 2
+    limit = 50
     offset = 0
     spotify_trending = Spotify_Ingestion("37i9dQZEVXbLRQDuF5jeBp", market, fields, limit, offset, access_token)
     spotify_trending.spotify_data_ingestion()
@@ -106,9 +110,13 @@ def main():
     billboard_hot_100.spotify_data_ingestion()
     billboard_hot_100.convert_dictionary_to_dataframe()
     billboard_hot_100_df = billboard_hot_100.quality_check()
-    return (spotify_trending_df, billboard_hot_100_df)
-    
+    print (spotify_trending_df)
+    print (billboard_hot_100_df)
+    spotify_trending_df.to_csv("~/Documents/CS/DE/tiktok_spotify_trending_analysis/spotify_trending.csv", index=False)
+    billboard_hot_100_df.to_csv("~/Documents/CS/DE/tiktok_spotify_trending_analysis/billboard_hot_100.csv", index=False)
 
+if __name__ == '__main__':  
+    main()
 
 
 
