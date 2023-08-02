@@ -94,7 +94,7 @@ class Spotify_Ingestion:
         
     
 
-def main():
+if __name__ == '__main__':
     client_id = "86d0905c767c4334b63a784fad23f81e"
     client_secret = "68d217c270ef43fb906f4ad7aa0dd462"  
     access_token = request_bearer_token(client_id, client_secret)
@@ -112,11 +112,8 @@ def main():
     billboard_hot_100_df = billboard_hot_100.quality_check()
     print (spotify_trending_df)
     print (billboard_hot_100_df)
-    spotify_trending_df.to_csv("~/Documents/CS/DE/tiktok_spotify_trending_analysis/spotify_trending.csv", index=False)
-    billboard_hot_100_df.to_csv("~/Documents/CS/DE/tiktok_spotify_trending_analysis/billboard_hot_100.csv", index=False)
-
-if __name__ == '__main__':  
-    main()
+    spotify_trending_df.to_csv("~/song_ranking/output_df/spotify_trending.csv", index=False)
+    billboard_hot_100_df.to_csv("~/song_ranking/output_df/billboard_hot_100.csv", index=False)
 
 
 
